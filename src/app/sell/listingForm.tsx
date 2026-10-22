@@ -1,7 +1,12 @@
 "use client";
 
 import { useState, type SubmitEvent } from "react";
-import { saveDraft, useListingDraft } from "./useListingDraft";
+import {
+  saveDraft,
+  useListingDraft,
+  confirmDraft,
+  clearDraft,
+} from "./useListingDraft";
 
 export default function ListingForm() {
     const [message, setMessage] = useState("");
@@ -29,9 +34,33 @@ export default function ListingForm() {
         }
     }
 
+    function handleConfirm() {
+        try {
+            confirmDraft();
+            setMessage("Listing confirmed! Open the listings page to see it.");
+        }
+        catch (error) {
+            setMessage(
+                error instanceof Error
+                ? error.message
+                : "Could not confirm the listing."
+            );
+        }
+    }
+
+    function handleClearDraft() {
+        try {
+            clearDraft();
+            setMessage("Saved draft cleared.");
+        } 
+        catch {
+            setMessage("Could not clear the saved draft.");
+        }
+    }
+
     return (
-        <form onSubmit={handleSubmit}>
-            <div>
+        <form className="card listing-form" onSubmit={handleSubmit}>
+            <div className="form-field">
                 <label htmlFor="title">Title</label>
                 <input
                     id="title"
@@ -44,7 +73,7 @@ export default function ListingForm() {
                 />
             </div>
 
-            <div>
+            <div className="form-field">
                 <label htmlFor="description">Description</label>
                 <textarea
                     id="description"
@@ -56,7 +85,7 @@ export default function ListingForm() {
                 />
             </div>
 
-            <div>
+            <div className="form-field">
                 <label htmlFor="category">Category</label>
                 <select id="category" name="category_id" defaultValue="" required>
                     <option value="" disabled>Choose a category</option>
@@ -69,7 +98,7 @@ export default function ListingForm() {
                 </select>
             </div>
 
-            <div>
+            <div className="form-field">
                 <label htmlFor="condition">Condition</label>
                 <select id="condition" name="condition" defaultValue="" required>
                     <option value="" disabled>Choose a condition</option>
@@ -80,7 +109,7 @@ export default function ListingForm() {
                 </select>
             </div>
 
-            <div>
+            <div className="form-field">
                 <label htmlFor="price">Price (USD)</label>
                 <input
                     id="price"
@@ -88,12 +117,12 @@ export default function ListingForm() {
                     type="number"
                     min="0"
                     step="0.01"
-                    placeholder="15.00"
+                    placeholder="10.00"
                     required
                 />
             </div>
 
-            <div>
+            <div className="form-field">
                 <label htmlFor="photos">Photos</label>
                 <input
                     id="photos"
@@ -104,15 +133,34 @@ export default function ListingForm() {
                 />
             </div>
 
-            <button type="submit">Save draft</button>
+            <button className="button" type="submit">Save draft</button>
 
-            <p role="status">{message}</p>
+            <p className="form-message" role="status">{message}</p>
 
             {savedDraft !== null && (
-                <section>
-                    <h2>Saved draft</h2>
-                    <pre>{savedDraft}</pre>
-                </section>
+            <section className="draft-preview">
+                <h2>Saved draft</h2>
+                <pre>{savedDraft}</pre>
+
+                <p>Confirm listing publishes the saved version shown above.</p>
+
+                <div className="form-actions">
+                <button
+                    className="button"
+                    type="button"
+                    onClick={handleConfirm}>
+                    Confirm listing
+                </button>
+
+                <button
+                    className="button button-secondary"
+                    type="button"
+                    onClick={handleClearDraft}
+                >
+                    Clear saved draft
+                </button>
+                </div>
+            </section>
             )}
         </form>
     );
